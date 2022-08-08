@@ -6,8 +6,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'Tech Summary',
+  tagline: 'Tech',
   url: 'https://your-docusaurus-test-site.com',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -57,24 +57,33 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'My Site',
-        logo: {
-          alt: 'My Site Logo',
-          src: 'img/logo.svg',
-        },
+        title: 'Tech summary',
+        // logo: {
+        //   alt: 'My Site Logo',
+        //   src: 'img/logo.svg',
+        // },
         items: [
           {
-            type: 'doc',
-            docId: 'intro',
+            to: 'docs/frontend/overview',
             position: 'left',
-            label: 'Tutorial',
+            label: 'Front-end',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
-            label: 'GitHub',
-            position: 'right',
+            to: 'docs/backend/overview',
+            position: 'left',
+            label: 'Back-end',
           },
+          {
+            to: 'docs/devops/overview',
+            position: 'left',
+            label: 'Dev-ops',
+          },
+          // {to: '/blog', label: 'Blog', position: 'left'},
+          // {
+          //   href: 'https://github.com/facebook/docusaurus',
+          //   label: 'GitHub',
+          //   position: 'right',
+          // },
         ],
       },
       footer: {
@@ -127,6 +136,8 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+
+  
 };
 
 module.exports = config;
