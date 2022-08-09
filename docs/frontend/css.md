@@ -1,561 +1,637 @@
 ---
-title: CSS trivia questions in front end interviews
+title: CSS
 sidebar_label: CSS
-sidebar_position: 4
+sidebar_position: 5
 ---
 
-Answers to [Front-end Job Interview Questions - CSS Questions](https://github.com/h5bp/Front-end-Developer-Interview-Questions/blob/master/src/questions/css-questions.md). Pull requests for suggestions and corrections are welcome!
+
 
 import TOCInline from '@theme/TOCInline';
 
 <TOCInline toc={toc} />
 
-### What is CSS selector specificity and how does it work?
+### Box Model
 
-The browser determines what styles to show on an element depending on the specificity of CSS rules. We assume that the browser has already determined the rules that match a particular element. Among the matching rules, the specificity, four comma-separate values, `a, b, c, d` are calculated for each rule based on the following:
+<p align="center">
+	<img src="/img/box model.png"/>  
+</p>
 
-1. `a` is whether inline styles are being used. If the property declaration is an inline style on the element, `a` is 1, else 0.
-2. `b` is the number of ID selectors.
-3. `c` is the number of classes, attributes and pseudo-classes selectors.
-4. `d` is the number of tags and pseudo-elements selectors.
+문서상의 요소들을 시각적인 목적을 위해서, 모든 요소를 하나의 "직사각형 박스"로 여기는 모델이다. 모든 박스는 아래 영역들을 갖는다.
 
-The resulting specificity is not a score, but a matrix of values that can be compared column by column. When comparing selectors to determine which has the highest specificity, look from left to right, and compare the highest value in each column. So a value in column `b` will override values in columns `c` and `d`, no matter what they might be. As such, specificity of `0,1,0,0` would be greater than one of `0,0,10,10`.
+* **컨텐츠 영역(Content Area)** : 글이나 이미지, 비디오 등 요소의 실제 내용을 포함한다.
+* **안쪽여백 영역(Padding Area)** : 안쪽여백 경계(Padding Edge)가 감싼 영역으로 컨텐츠 영역을 요소의 안쪽 여백까지 포함하는 크기로 확장한다.
+* **테두리 영역(Border Area)** : 테두리 경계(Border Edge)가 감싼 영역으로, 안쪽여백 영역을 요소의 테두리까지 포함하는 크기로 확장한다.
+* **바깥여백 영역(Margin Area)** : 바깥여백 경계(Margin Edge)가 감싼 영역으로, 테두리 영역을 확장해 요소와 인근 요소사이의 빈 공간까지 포함하도록 한다.
 
-In the cases of equal specificity: the latest rule is the one that counts. If you have written the same rule into your stylesheet (regardless of internal or external) twice, then the lower rule in your style sheet is closer to the element to be styled, it is deemed to be more specific and therefore will be applied.
+<br/>
 
-I would write CSS rules with low specificity so that they can be easily overridden if necessary. When writing CSS UI component library code, it is important that they have low specificities so that users of the library can override them without using too complicated CSS rules just for the sake of increasing specificity or resorting to `!important`.
+#### box-sizing
 
-###### References
+box-sizing 속성을 사용하면, `width` 와 `height` 이 컨텐츠 영역 기준인지, 테두리 영역 기준인지 정할 수 있다.
 
-- https://www.smashingmagazine.com/2007/07/css-specificity-things-you-should-know/
-- https://www.sitepoint.com/web-foundations/specificity/
+* `box-sizing: content-box` : 기본값이며 컨텐츠 영역 기준이다. 즉, 안쪽여백 영역부터 포함하지 않는다.
+* `box-sizing: border-box` : 테두리 영역 기준이며 바깥여백 영역부터 포함하지 않는다.
 
-[[↑] Back to top](#table-of-contents)
+<br/>
 
-### What's the difference between "resetting" and "normalizing" CSS? Which would you choose, and why?
+#### 참고
 
-- **Resetting** - Resetting is meant to strip all default browser styling on elements. For e.g. `margin`s, `padding`s, `font-size`s of all elements are reset to be the same. You will have to redeclare styling for common typographic elements.
-- **Normalizing** - Normalizing preserves useful default styles rather than "unstyling" everything. It also corrects bugs for common browser dependencies.
+* [MDN, CSS 기본 박스 모델 입문](https://developer.mozilla.org/ko/docs/Web/CSS/CSS_Box_Model/Introduction_to_the_CSS_box_model)
+* [W3, CSS Box Model Module Level 3](https://www.w3.org/TR/css-box-3/)
+* [BrainJar, CSS Positioning](http://www.brainjar.com/css/positioning/)
 
-I would choose resetting when I have a very customized or unconventional site design such that I need to do a lot of my own styling and do not need any default styling to be preserved.
+***
 
-###### References
+### 마진겹침 현상
 
-- https://stackoverflow.com/questions/6887336/what-is-the-difference-between-normalize-css-and-reset-css
+마진겹침(Margin-Collpasing)이란 블록 레벨 엘리먼트(Block-level element)에 한해서 발생하는 현상으로, 좌우 방향으로는 적용되지 않고 **오로지 수직방향** 으로 적용된다. 2개의 마진이 겹칠 때 더 큰 마진으로 덮어 씌우는 방식이며 하나의 마진이 음수일 경우 더하는 방식을 취한다.
 
-[[↑] Back to top](#table-of-contents)
+<br/>
 
-### Describe `float`s and how they work.
+#### 3가지 경우
 
-Float is a CSS positioning property. Floated elements remain a part of the flow of the page, and will affect the positioning of other elements (e.g. text will flow around floated elements), unlike `position: absolute` elements, which are removed from the flow of the page.
+마진겹침은 블록 레벨 엘리먼트라는 가정하에 3가지 경우에 한해서 발생한다.
 
-The CSS `clear` property can be used to be positioned below `left`/`right`/`both` floated elements.
-
-If a parent element contains nothing but floated elements, its height will be collapsed to nothing. It can be fixed by clearing the float after the floated elements in the container but before the close of the container.
-
-The `.clearfix` hack uses a clever CSS [pseudo selector](#describe-pseudo-elements-and-discuss-what-they-are-used-for) (`:after`) to clear floats. Rather than setting the overflow on the parent, you apply an additional class `clearfix` to it. Then apply this CSS:
-
-```css
-.clearfix:after {
-  content: ' ';
-  visibility: hidden;
-  display: block;
-  height: 0;
-  clear: both;
-}
-```
-
-Alternatively, give `overflow: auto` or `overflow: hidden` property to the parent element which will establish a new block formatting context inside the children and it will expand to contain its children.
-
-###### References
-
-- https://css-tricks.com/all-about-floats/
-
-[[↑] Back to top](#table-of-contents)
-
-### Describe `z-index` and how stacking context is formed.
-
-The `z-index` property in CSS controls the vertical stacking order of elements that overlap. `z-index` only affects elements that have a `position` value which is not `static`.
-
-Without any `z-index` value, elements stack in the order that they appear in the DOM (the lowest one down at the same hierarchy level appears on top). Elements with non-static positioning (and their children) will always appear on top of elements with default static positioning, regardless of HTML hierarchy.
-
-A stacking context is an element that contains a set of layers. Within a local stacking context, the `z-index` values of its children are set relative to that element rather than to the document root. Layers outside of that context — i.e. sibling elements of a local stacking context — can't sit between layers within it. If an element B sits on top of element A, a child element of element A, element C, can never be higher than element B even if element C has a higher `z-index` than element B.
-
-Each stacking context is self-contained - after the element's contents are stacked, the whole element is considered in the stacking order of the parent stacking context. A handful of CSS properties trigger a new stacking context, such as `opacity` less than 1, `filter` that is not `none`, and `transform` that is not`none`.
-
-_Note: What exactly qualifies an element to create a stacking context is listed in this long set of [rules](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context#The_stacking_context)._
-
-###### References
-
-- https://css-tricks.com/almanac/properties/z/z-index/
-- https://philipwalton.com/articles/what-no-one-told-you-about-z-index/
-- https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context
-
-[[↑] Back to top](#table-of-contents)
-
-### Describe Block Formatting Context (BFC) and how it works.
-
-A Block Formatting Context (BFC) is part of the visual CSS rendering of a web page in which block boxes are laid out. Floats, absolutely positioned elements, `inline-blocks`, `table-cells`, `table-caption`s, and elements with `overflow` other than `visible` (except when that value has been propagated to the viewport) establish new block formatting contexts.
-
-Knowing how to establish a block formatting context is important, because without doing so, the containing box will not [contain floated children](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context#Make_float_content_and_alongside_content_the_same_height). This is similar to collapsing margins, but more insidious as you will find entire boxes collapsing in odd ways.
-
-A BFC is an HTML box that satisfies at least one of the following conditions:
-
-- The value of `float` is not `none`.
-- The value of `position` is neither `static` nor `relative`.
-- The value of `display` is `table-cell`, `table-caption`, `inline-block`, `flex`, or `inline-flex`, `grid`, or `inline-grid`.
-- The value of `overflow` is not `visible`.
-
-In a BFC, each box's left outer edge touches the left edge of the containing block (for right-to-left formatting, right edges touch).
-
-Vertical margins between adjacent block-level boxes in a BFC collapse. Read more on [collapsing margins](https://www.sitepoint.com/web-foundations/collapsing-margins/).
-
-###### References
-
-- https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context
-- https://www.sitepoint.com/understanding-block-formatting-contexts-in-css/
-
-[[↑] Back to top](#table-of-contents)
-
-### What are the various clearing techniques and which is appropriate for what context?
-
-- Empty `div` method - `<div style="clear:both;"></div>`.
-- Clearfix method - Refer to the `.clearfix` class above.
-- `overflow: auto` or `overflow: hidden` method - Parent will establish a new block formatting context and expand to contains its floated children.
-
-In large projects, I would write a utility `.clearfix` class and use them in places where I need it. `overflow: hidden` might clip children if the children is taller than the parent and is not very ideal.
-
-[[↑] Back to top](#table-of-contents)
-
-### Explain CSS sprites, and how you would implement them on a page or site.
-
-CSS sprites combine multiple images into one single larger image. It is a commonly-used technique for icons (Gmail uses it). How to implement it:
-
-1. Use a sprite generator that packs multiple images into one and generate the appropriate CSS for it.
-1. Each image would have a corresponding CSS class with `background-image`, `background-position` and `background-size` properties defined.
-1. To use that image, add the corresponding class to your element.
-
-**Advantages:**
-
-- Reduce the number of HTTP requests for multiple images (only one single request is required per spritesheet). But with HTTP2, loading multiple images is no longer much of an issue.
-- Advance downloading of assets that won't be downloaded until needed, such as images that only appear upon `:hover` pseudo-states. Blinking wouldn't be seen.
-
-###### References
-
-- https://css-tricks.com/css-sprites/
-
-[[↑] Back to top](#table-of-contents)
-
-### How would you approach fixing browser-specific styling issues?
-
-- After identifying the issue and the offending browser, use a separate style sheet that only loads when that specific browser is being used. This technique requires server-side rendering though.
-- Use libraries like Bootstrap that already handles these styling issues for you.
-- Use `autoprefixer` to automatically add vendor prefixes to your code.
-- Use Reset CSS or Normalize.css.
-- If you're using Postcss (or a similar transpiling library), there may be plugins which allow you to opt in for using modern CSS syntax (and even W3C proposals) that will transform those sections of your code into corresponding safe code that will work in the targets you've used.
-
-[[↑] Back to top](#table-of-contents)
-
-### How do you serve your pages for feature-constrained browsers? What techniques/processes do you use?
-
-- Graceful degradation - The practice of building an application for modern browsers while ensuring it remains functional in older browsers.
-- Progressive enhancement - The practice of building an application for a base level of user experience, but adding functional enhancements when a browser supports it.
-- Use [caniuse.com](https://caniuse.com/) to check for feature support.
-- Autoprefixer for automatic vendor prefix insertion.
-- Feature detection using [Modernizr](https://modernizr.com/).
-- Use CSS Feature queries [@support](https://developer.mozilla.org/en-US/docs/Web/CSS/@supports)
-
-[[↑] Back to top](#table-of-contents)
-
-### What are the different ways to visually hide content (and make it available only for screen readers)?
-
-These techniques are related to accessibility (a11y).
-
-- `width: 0; height: 0`. Make the element not take up any space on the screen at all, resulting in not showing it.
-- `position: absolute; left: -99999px`. Position it outside of the screen.
-- `text-indent: -9999px`. This only works on text within the `block` elements.
-- Meta tags. For example by using Schema.org, RDF, and JSON-LD.
-- WAI-ARIA. A W3C technical specification that specifies how to increase the accessibility of web pages.
-
-Even if WAI-ARIA is the ideal solution, I would go with the `absolute` positioning approach, as it has the least caveats, works for most elements and it's an easy technique.
-
-###### References
-
-- https://www.w3.org/TR/wai-aria-1.1/
-- https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
-- http://a11yproject.com/
-
-[[↑] Back to top](#table-of-contents)
-
-### Have you ever used a grid system, and if so, what do you prefer?
-
-Before Flex became popular (around 2014), the `float`-based grid system was the most reliable because it still has the most browser support among the alternative existing systems (flex, grid). Bootstrap was using the `float` approach until Bootstrap 4 which switched to the `flex`-based approach. As of writing (2020), `flex` is the recommended approach for building grid systems and has [decent browser support](https://caniuse.com/#search=flex).
-
-For the adventurous, they can look into [CSS Grid Layout](https://css-tricks.com/snippets/css/complete-guide-grid/), which uses the shiny new `grid` property; it is even better than `flex` for building grid layouts and will be the de facto way to do so in the future.
-
-[[↑] Back to top](#table-of-contents)
-
-### Have you used or implemented media queries or mobile-specific layouts/CSS?
-
-Yes. An example would be transforming a stacked pill navigation into a fixed-bottom tab navigation beyond a certain breakpoint.
-
-[[↑] Back to top](#table-of-contents)
-
-### Are you familiar with styling SVG?
-
-Yes, there are several ways to color shapes (including specifying attributes on the object) using inline CSS, an embedded CSS section, or an external CSS file. Most SVG you'll find around the web use inline CSS, but there are advantages and disadvantages associated with each type.
-
-Basic coloring can be done by setting two attributes on the node: `fill` and `stroke`. `fill` sets the color inside the object and `stroke` sets the color of the line drawn around the object. You can use the same CSS color naming schemes that you use in HTML, whether that's color names (that is `red`), RGB values (that is `rgb(255,0,0)`), Hex values, RGBA values, etc.
+1. **인접한 엘리먼트**
 
 ```html
-<rect
-  x="10"
-  y="10"
-  width="100"
-  height="100"
-  stroke="blue"
-  fill="purple"
-  fill-opacity="0.5"
-  stroke-opacity="0.8"
-/>
+<div class="element1"></div>
+<div class="element2"></div>
 ```
-
-The above `fill="purple"` is an example of a _presentational attribute_. Interestingly, and unlike inline styles like `style="fill: purple"` which also happens to be an attribute, presentational attributes can be [overriden by CSS](https://css-tricks.com/presentation-attributes-vs-inline-styles/) styles defined in a stylesheet. So, if you did something like `svg { fill: blue; }` it would override the purple fill we've defined.
-
-###### References
-
-- https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Fills_and_Strokes
-
-[[↑] Back to top](#table-of-contents)
-
-### Can you give an example of an @media property other than screen?
-
-Yes, there are four types of @media properties (including _screen_):
-
-- `all` - for all media type devices
-- `print` - for printers
-- `speech` - for screenreaders that "reads" the page out loud
-- `screen` - for computer screens, tablets, smart-phones etc.
-
-Here is an example of `print` media type's usage:
 
 ```css
-@media print {
-  body {
-    color: black;
-  }
+div {
+  width: 100px;
+  height: 100px;
+  background-color: red;
 }
+.element1 { margin-bottom: 20px; }
+.element2 { margin-top: 40px; }
 ```
 
-###### References
+<p align="center">
+<img src="/img/margin-collapsing1.png"/>
+</p>
 
-- https://developer.mozilla.org/en-US/docs/Web/CSS/@media#Syntax
+두번째 엘리먼트의 위쪽 마진이 더 크기 때문에 둘 사이의 간격은 40px이 된다.
 
-[[↑] Back to top](#table-of-contents)
-
-### What are some of the "gotchas" for writing efficient CSS?
-
-Firstly, understand that browsers match selectors from rightmost (key selector) to left. Browsers filter out elements in the DOM according to the key selector and traverse up its parent elements to determine matches. The shorter the length of the selector chain, the faster the browser can determine if that element matches the selector. Hence avoid key selectors that are tag and universal selectors. They match a large number of elements and browsers will have to do more work in determining if the parents do match.
-
-[BEM (Block Element Modifier)](https://bem.info/) methodology recommends that everything has a single class, and, where you need hierarchy, that gets baked into the name of the class as well, this naturally makes the selector efficient and easy to override.
-
-Be aware of which CSS properties [trigger](https://csstriggers.com/) reflow, repaint, and compositing. Avoid writing styles that change the layout (trigger reflow) where possible.
-
-###### References
-
-- https://developers.google.com/web/fundamentals/performance/rendering/
-- https://csstriggers.com/
-
-[[↑] Back to top](#table-of-contents)
-
-### What are the advantages/disadvantages of using CSS preprocessors?
-
-**Advantages:**
-
-- CSS is made more maintainable.
-- Easy to write nested selectors.
-- Variables for consistent theming. Can share theme files across different projects.
-- Mixins to generate repeated CSS.
-- Sass features like loops, lists, and maps can make configuration easier and less verbose.
-- Splitting your code into multiple files. CSS files can be split up too but doing so will require an HTTP request to download each CSS file.
-
-**Disadvantages:**
-
-- Requires tools for preprocessing. Re-compilation time can be slow.
-- Not writing currently and potentially usable CSS. For example, by using something like [postcss-loader](https://github.com/postcss/postcss-loader) with [webpack](https://webpack.js.org/), you can write potentially future-compatible CSS, allowing you to use things like CSS variables instead of Sass variables. Thus, you're learning new skills that could pay off if/when they become standardized.
-
-[[↑] Back to top](#table-of-contents)
-
-### Describe what you like and dislike about the CSS preprocessors you have used.
-
-**Likes:**
-
-- Mostly the advantages mentioned above.
-- Less is written in JavaScript, which plays well with Node.
-
-**Dislikes:**
-
-- I use Sass via `node-sass`, which is a binding for LibSass written in C++. I have to frequently recompile it when switching between node versions.
-- In Less, variable names are prefixed with `@`, which can be confused with native CSS keywords like `@media`, `@import` and `@font-face` rule.
-
-[[↑] Back to top](#table-of-contents)
-
-### How would you implement a web design comp that uses non-standard fonts?
-
-Use `@font-face` and define `font-family` for different `font-weight`s.
-
-[[↑] Back to top](#table-of-contents)
-
-### Explain how a browser determines what elements match a CSS selector.
-
-This part is related to the above about [writing efficient CSS](#what-are-some-of-the-gotchas-for-writing-efficient-css). Browsers match selectors from rightmost (key selector) to left. Browsers filter out elements in the DOM according to the key selector and traverse up its parent elements to determine matches. The shorter the length of the selector chain, the faster the browser can determine if that element matches the selector.
-
-For example with this selector `p span`, browsers firstly find all the `<span>` elements and traverse up its parent all the way up to the root to find the `<p>` element. For a particular `<span>`, as soon as it finds a `<p>`, it knows that the `<span>` matches and can stop its matching.
-
-###### References
-
-- https://stackoverflow.com/questions/5797014/why-do-browsers-match-css-selectors-from-right-to-left
-
-[[↑] Back to top](#table-of-contents)
-
-### Describe pseudo-elements and discuss what they are used for.
-
-A CSS pseudo-element is a keyword added to a selector that lets you style a specific part of the selected element(s). They can be used for decoration (`:first-line`, `:first-letter`) or adding elements to the markup (combined with `content: ...`) without having to modify the markup (`:before`, `:after`).
-
-- `:first-line` and `:first-letter` can be used to decorate text.
-- Used in the `.clearfix` hack as shown above to add a zero-space element with `clear: both`.
-- Triangular arrows in tooltips use `:before` and `:after`. Encourages separation of concerns because the triangle is considered part of styling and not really the DOM.
-
-###### References
-
-- https://css-tricks.com/almanac/selectors/a/after-and-before/
-
-[[↑] Back to top](#table-of-contents)
-
-### Explain your understanding of the box model and how you would tell the browser in CSS to render your layout in different box models.
-
-The CSS box model describes the rectangular boxes that are generated for elements in the document tree and laid out according to the visual formatting model. Each box has a content area (e.g. text, an image, etc.) and optional surrounding `padding`, `border`, and `margin` areas.
-
-The CSS box model is responsible for calculating:
-
-- How much space a block element takes up.
-- Whether or not borders and/or margins overlap, or collapse.
-- A box's dimensions.
-
-The box model has the following rules:
-
-- The dimensions of a block element are calculated by `width`, `height`, `padding`, `border`s, and `margin`s.
-- If no `height` is specified, a block element will be as high as the content it contains, plus `padding` (unless there are floats, for which see below).
-- If no `width` is specified, a non-floated block element will expand to fit the width of its parent minus `padding`.
-- The `height` of an element is calculated by the content's `height`.
-- The `width` of an element is calculated by the content's `width`.
-- By default, `padding`s and `border`s are not part of the `width` and `height` of an element.
-
-###### References
-
-- https://www.smashingmagazine.com/2010/06/the-principles-of-cross-browser-css-coding/#understand-the-css-box-model
-
-[[↑] Back to top](#table-of-contents)
-
-### What does `* { box-sizing: border-box; }` do? What are its advantages?
-
-- By default, elements have `box-sizing: content-box` applied, and only the content size is being accounted for.
-- `box-sizing: border-box` changes how the `width` and `height` of elements are being calculated, `border` and `padding` are also being included in the calculation.
-- The `height` of an element is now calculated by the content's `height` + vertical `padding` + vertical `border` width.
-- The `width` of an element is now calculated by the content's `width` + horizontal `padding` + horizontal `border` width.
-- Taking into account `padding`s and `border`s as part of our box model resonates better with how designers actually imagine content in grids.
-
-###### References
-
-- https://www.paulirish.com/2012/box-sizing-border-box-ftw/
-
-[[↑] Back to top](#table-of-contents)
-
-### What is the CSS `display` property and can you give a few examples of its use?
-
-- `none`, `block`, `inline`, `inline-block`, `flex`, `grid`, `table`, `table-row`, `table-cell`, `list-item`.
-
-| `display` | Description |
-| :-- | :-- |
-| `none` | Does not display an element (the element no longer affects the layout of the document). All child element are also no longer displayed. The document is rendered as if the element did not exist in the document tree |
-| `block` | The element consumes the whole line in the block direction (which is usually horizontal) |
-| `inline` | Elements can be laid out beside each other |
-| `inline-block` | Similar to `inline`, but allows some `block` properties like setting `width` and `height` |
-| `table` | Behaves like the `<table>` element |
-| `table-row` | Behaves like the `<tr>` element |
-| `table-cell` | Behaves like the `<td>` element |
-| `list-item` | Behaves like a `<li>` element which allows it to define `list-style-type` and `list-style-position` |
-
-[[↑] Back to top](#table-of-contents)
-
-### What's the difference between `inline` and `inline-block`?
-
-I shall throw in a comparison with `block` for good measure.
-
-|  | `block` | `inline-block` | `inline` |
-| --- | --- | --- | --- |
-| Size | Fills up the width of its parent container. | Depends on content. | Depends on content. |
-| Positioning | Start on a new line and tolerates no HTML elements next to it (except when you add `float`) | Flows along with other content and allows other elements beside it. | Flows along with other content and allows other elements beside it. |
-| Can specify `width` and `height` | Yes | Yes | No. Will ignore if being set. |
-| Can be aligned with `vertical-align` | No | Yes | Yes |
-| Margins and paddings | All sides respected. | All sides respected. | Only horizontal sides respected. Vertical sides, if specified, do not affect layout. Vertical space it takes up depends on `line-height`, even though the `border` and `padding` appear visually around the content. |
-| Float | - | - | Becomes like a `block` element where you can set vertical margins and paddings. |
-
-[[↑] Back to top](#table-of-contents)
-
-### What's the difference between a `relative`, `fixed`, `absolute` and `static`ally positioned element?
-
-A positioned element is an element whose computed `position` property is either `relative`, `absolute`, `fixed` or `sticky`.
-
-- `static` - The default position; the element will flow into the page as it normally would. The `top`, `right`, `bottom`, `left` and `z-index` properties do not apply.
-- `relative` - The element's position is adjusted relative to itself, without changing layout (and thus leaving a gap for the element where it would have been had it not been positioned).
-- `absolute` - The element is removed from the flow of the page and positioned at a specified position relative to its closest positioned ancestor if any, or otherwise relative to the initial containing block. Absolutely positioned boxes can have margins, and they do not collapse with any other margins. These elements do not affect the position of other elements.
-- `fixed` - The element is removed from the flow of the page and positioned at a specified position relative to the viewport and doesn't move when scrolled.
-- `sticky` - Sticky positioning is a hybrid of relative and fixed positioning. The element is treated as `relative` positioned until it crosses a specified threshold, at which point it is treated as `fixed` positioned.
-
-###### References
-
-- https://developer.mozilla.org/en/docs/Web/CSS/position
-
-[[↑] Back to top](#table-of-contents)
-
-### What existing CSS frameworks have you used locally, or in production? How would you change/improve them?
-
-- **Bootstrap** - Slow release cycle. Bootstrap 4 has been in alpha for almost 2 years. Add a spinner button component, as it is widely used.
-- **Semantic UI** - Source code structure makes theme customization extremely hard to understand. Its unconventional theming system is a pain to customize. Hardcoded config path within the vendor library. Not well-designed for overriding variables unlike in Bootstrap.
-- **Bulma** - A lot of non-semantic and superfluous classes and markup required. Not backward compatible. Upgrading versions breaks the app in subtle manners.
-
-[[↑] Back to top](#table-of-contents)
-
-### Have you played around with the new CSS Flexbox or Grid specs?
-
-Yes. Flexbox is mainly meant for 1-dimensional layouts while Grid is meant for 2-dimensional layouts.
-
-Flexbox solves many common problems in CSS, such as vertical centering of elements within a container, sticky footer, etc. Bootstrap and Bulma are based on Flexbox, and it is probably the recommended way to create layouts these days. Have tried Flexbox before but ran into some browser incompatibility issues (Safari) in using `flex-grow`, and I had to rewrite my code using `inline-blocks` and math to calculate the widths in percentages, it wasn't a nice experience.
-
-Grid is by far the most intuitive approach for creating grid-based layouts (it better be!) but browser support is not wide at the moment.
-
-###### References
-
-- https://philipwalton.github.io/solved-by-flexbox/
-
-[[↑] Back to top](#table-of-contents)
-
-### Can you explain the difference between coding a website to be responsive versus using a mobile-first strategy?
-
-Note that these two 2 approaches are not exclusive.
-
-Making a website responsive means the some elements will respond by adapting its size or other functionality according to the device's screen size, typically the viewport width, through CSS media queries, for example, making the font size smaller on smaller devices.
-
-```css
-@media (min-width: 601px) {
-  .my-class {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 600px) {
-  .my-class {
-    font-size: 12px;
-  }
-}
-```
-
-A mobile-first strategy is also responsive, however it agrees we should default and define all the styles for mobile devices, and only add specific responsive rules to other devices later. Following the previous example:
-
-```css
-.my-class {
-  font-size: 12px;
-}
-
-@media (min-width: 600px) {
-  .my-class {
-    font-size: 24px;
-  }
-}
-```
-
-A mobile-first strategy has 2 main advantages:
-
-- It's more performant on mobile devices, since all the rules applied for them don't have to be validated against any media queries.
-- It forces to write cleaner code in respect to responsive CSS rules.
-
-[[↑] Back to top](#table-of-contents)
-
-### How is responsive design different from adaptive design?
-
-Both responsive and adaptive design attempt to optimize the user experience across different devices, adjusting for different viewport sizes, resolutions, usage contexts, control mechanisms, and so on.
-
-Responsive design works on the principle of flexibility - a single fluid website that can look good on any device. Responsive websites use media queries, flexible grids, and responsive images to create a user experience that flexes and changes based on a multitude of factors. Like a single ball growing or shrinking to fit through several different hoops.
-
-Adaptive design is more like the modern definition of progressive enhancement. Instead of one flexible design, adaptive design detects the device and other features and then provides the appropriate feature and layout based on a predefined set of viewport sizes and other characteristics. The site detects the type of device used and delivers the pre-set layout for that device. Instead of a single ball going through several different-sized hoops, you'd have several different balls to use depending on the hoop size.
-
-Both have these methods have some issues that need to be weighed:
-
-- Responsive design can be quite challenging, as you're essentially using a single albeit responsive layout to fit all situations. How to set the media query breakpoints is one such challenge. Do you use standardized breakpoint values? Or, do you use breakpoints that make sense to your particular layout? What if that layout changes?
-- Adaptive design generally requires user agent sniffing, or DPI detection, etc., all of which can prove unreliable.
-
-###### References
-
-- https://developer.mozilla.org/en-US/docs/Archive/Apps/Design/UI_layout_basics/Responsive_design_versus_adaptive_design
-- http://mediumwell.com/responsive-adaptive-mobile/
-- https://css-tricks.com/the-difference-between-responsive-and-adaptive-design/
-
-[[↑] Back to top](#table-of-contents)
-
-### Have you ever worked with retina graphics? If so, when and what techniques did you use?
-
-_Retina_ is just a marketing term to refer to high resolution screens with a pixel ratio bigger than 1. The key thing to know is that using a pixel ratio means these displays are emulating a lower resolution screen in order to show elements with the same size. Nowadays we consider all mobile devices _retina_ defacto displays.
-
-Browsers by default render DOM elements according to the device resolution, except for images.
-
-In order to have crisp, good-looking graphics that make the best of retina displays we need to use high resolution images whenever possible. However using always the highest resolution images will have an impact on performance as more bytes will need to be sent over the wire.
-
-To overcome this problem, we can use responsive images, as specified in HTML5. It requires making available different resolution files of the same image to the browser and let it decide which image is best, using the html attribute `srcset` and optionally `sizes`, for instance:
+2. **부모와 처음/마지막 자식 사이에서**
 
 ```html
-<div responsive-background-image>
-  <img
-    src="/images/test-1600.jpg"
-    sizes="
-      (min-width: 768px) 50vw,
-      (min-width: 1024px) 66vw,
-      100vw"
-    srcset="
-      /images/test-400.jpg   400w,
-      /images/test-800.jpg   800w,
-      /images/test-1200.jpg 1200w
-    "
-  />
+<div class="parent">
+  <div class="child">
+  </div>
 </div>
 ```
 
-It is important to note that browsers which don't support HTML5's `srcset` (i.e. IE11) will ignore it and use `src` instead. If we really need to support IE11 and we want to provide this feature for performance reasons, we can use a JavaScript polyfill, e.g. Picturefill (link in the references).
+```css
+div {
+  width: 100px;
+  height: 100px;
+}
+.parent {
+  background-color: red;
+  margin-top: 20px; 
+}
+.child { 
+  background-color: blue;
+  margin-top: 20px; 
+}
+```
 
-For icons, I would also opt to use SVGs and icon fonts where possible, as they render very crisply regardless of resolution.
+<p align="center">
+<img src="/img/margin-collapsing2.png"/>
+</p>
 
-###### References
+둘의 마진이 같기 때문에 20px이 된다. 이를 해결하기 위해선 **부모에 inline 컨텐츠, border, padding** 을 줘서 경계를 구분시키면 된다.
 
-- https://css-tricks.com/responsive-images-youre-just-changing-resolutions-use-srcset/
-- http://scottjehl.github.io/picturefill/
-- https://aclaes.com/responsive-background-images-with-srcset-and-sizes/
+```css
+.parent {
+  background-color: red;
+  border: 1px solid red;
+  margin-top: 20px;
+}
+```
 
-[[↑] Back to top](#table-of-contents)
+<p align="center">
+<img src="/img/margin-collapsing3.png"/>
+</p>
 
-### Is there any reason you'd want to use `translate()` instead of `absolute` positioning, or vice-versa? And why?
+3. **빈 엘리먼트**
 
-`translate()` is a value of CSS `transform`. Changing `transform` or `opacity` does not trigger browser reflow or repaint but does trigger compositions; whereas changing the absolute positioning triggers `reflow`. `transform` causes the browser to create a GPU layer for the element but changing absolute positioning properties uses the CPU. Hence `translate()` is more efficient and will result in shorter paint times for smoother animations.
+```html
+<div class="empty"></div>
+<div class="element"></div>
+```
 
-When using `translate()`, the element still occupies its original space (sort of like `position: relative`), unlike in changing the absolute positioning.
+```css
+.empty { margin-top: 50px; }
+.element {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  margin-top: 100px;
+}
+```
+<p align="center">
+<img src="/img/margin-collapsing4.png"/>
+</p>
 
-###### References
 
-- https://www.paulirish.com/2012/why-moving-elements-with-translate-is-better-than-posabs-topleft/
 
-[[↑] Back to top](#table-of-contents)
+높이가 없는 빈 엘리먼트가 인접해있을 때도 마진겹침이 발생하여 위쪽 마진은 100px이 된다. 이를 해결하기 위해선 **빈 엘리먼트에 height, min-height, padding, border나 inline 컨텐츠** 를 줘서 경계를 구분시키면 된다.
 
-### Other Answers
+```css
+.empty {
+  border: 1px solid red;
+  margin-top: 50px;
+}
+```
+<p align="center">
+<img src="/img/margin-collapsing5.png"/>
+</p>
 
-- https://neal.codes/blog/front-end-interview-css-questions
-- https://quizlet.com/28293152/front-end-interview-questions-css-flash-cards/
-- http://peterdoes.it/2015/12/03/a-personal-exercise-front-end-job-interview-questions-and-my-answers-all/
+
+<br/>
+
+#### 예외 대상
+
+`position: absolute` , `float: left` , `display: flex` 등 다양한 상황에 마진겹침이 발생하지 않지만, 그냥 **새로운 BFC(Block Formatting Context)를 생성하는 조건이 마진겹침을 발생시키지 않는다** 고 알아두면 된다.
+
+<br/>
+
+#### 참고
+
+* [MDN, 마진 상쇄 정복](https://developer.mozilla.org/ko/docs/Web/CSS/CSS_Box_Model/Mastering_margin_collapsing)
+* [Velog, CSS 마진 상쇄(Margin-collapsing) 원리 완벽 이해](https://velog.io/@raram2/CSS-%EB%A7%88%EC%A7%84-%EC%83%81%EC%87%84Margin-collapsing-%EC%9B%90%EB%A6%AC-%EC%99%84%EB%B2%BD-%EC%9D%B4%ED%95%B4#%EB%A7%88%EC%A7%84-%EC%83%81%EC%87%84-%EA%B7%9C%EC%B9%99-%EC%98%88%EC%99%B8)
+* [Youtube, [ㅁ] 마진병합 margin collapsing | 코딩가나다 | 빔캠프](https://www.youtube.com/watch?v=c19Mjg-ivxc)
+* [생활코딩, 마진겹침 현상](https://opentutorials.org/course/2418/13464)
+
+
+***
+
+# Block Formatting Context
+
+MDN의 정의를 보면,
+
+> *BFC는 웹페이지의 블록 레벨 요소를 렌더링하는데 사용되는 CSS의 비주얼 서식 모델 중 하나이다.*
+
+즉, 블록 레벨 요소가 포함되는 **서식모델** 이다.
+
+<br/>
+
+#### 생성 조건
+
+BFC가 생성되기 위해선 다음과 같은 조건 중 하나를 만족해야 한다.
+
+* 루트 혹은 이를 포함하는 요소
+
+* float가 none이 아니면서 clear 되지 않은 경우
+* position이 absolute / fixed
+* display가 inline-block / tabel-cell / tabel-caption
+* overflow가 visible이 아님
+* display가 flex / inline-flex
+
+위 조건에 따른 예제를 보면, 아래 요소들은 모두 BFC를 생성한다.
+
+```html
+<div class="float"></div>
+<div class="position"></div>
+<div class="display"></div>
+<div class="overflow"></div>
+<div class="flex"></div>
+```
+
+```css
+.float { float: left; }
+.position { position: absolute; }
+.display { display: inline-block; }
+.overflow { overflow: hidden; }
+.flex { display: flex; }
+```
+
+<br/>
+
+#### 활용
+
+1. **마진겹침 제거하기**
+
+```html
+<div class="bfc">
+  <p>element</p>
+  <p>element</p>
+  <div class="new-bfc">
+    <p>element</p>
+  </div>
+</div>
+```
+
+```css
+div {
+  background-color: blue;
+}
+p {
+  margin: 10px 0;
+  background-color: green;
+}
+.bfc {
+  overflow: hidden;
+}
+.new-bfc {
+  overflow: hidden;
+}
+```
+
+[Codepen](https://codepen.io/BaeHaram/pen/YzXGZBd)
+
+`p` 태그 사이에 10px의 마진이 마진겹침으로 인해 20px이 아닌 10px이 되었다. 이 때 새로운 BFC를 생성해서 `p` 를 집어넣으면 마진겹침을 해결할 수 있다.
+
+2. **float된 요소들 포함하기**
+
+```html
+<div class="container">
+  <div class="float"></div>
+</div>
+```
+
+```css
+.container {
+  border: 3px solid red;
+  overflow: hidden;
+}
+
+.float {
+  float: left;
+  width: 500px;
+  height: 300px;
+  background-color: yellow;
+}
+```
+
+보통 float된 요소를 포함하기 위해선 `.clearfix` 핵을 사용하지만 새로운 BFC를 생성함으로도 해결할 수 있다.
+
+3. **float된 요소를 감싸는 텍스트를 분리하기**
+
+```html
+ <div class="container">
+  <div class="box"></div>
+  <p>많은 양의 텍스트....</p>
+</div>
+```
+
+```css
+.container {
+  border: 3px solid red;
+  overflow: hidden;
+}
+.box {
+  float: left;
+  width: 100px;
+  height: 100px;
+  background-color: green;
+}
+
+p {
+  overflow: hidden;
+}
+```
+
+`p` 태그로 새로운 BFC를 생성하여 텍스트가 float 된 요소를 감싸지 않도록 하였다.
+
+<br/>
+
+#### 참고
+
+* [Understanding Block Formatting Contexts in CSS](https://www.sitepoint.com/understanding-block-formatting-contexts-in-css/)
+* [MDN, Block formatting context](https://developer.mozilla.org/ko/docs/Web/Guide/CSS/Block_formatting_context)
+
+
+***
+
+
+### z-index의 동작방식
+
+#### z-index와 쌓임 맥락
+
+z-index를 이해하기 위해선 먼저, 쌓임 맥락(Stacking Context)의 개념을 이해해야 한다. **쌓임 맥락이란, HTML 요소들에 사용자를 바라보는 기준으로 가상의 z축을 생성하여 3차원 개념으로 보는 것** 이다. 따라서, 쌓임 맥락을 형성한다는 것은 자신만의 3차원 공간을 형성하는 것이며 그 요소들의 우선순위를 z-index가 정하게 되는 원리이다.
+
+<img src="/img/stacking context.png"/>
+
+[그림 출처](https://tympanus.net/codrops/css_reference/z-index/)
+
+위 그림을 보면, 각 요소들이 사용자를 바라보는 z축 상에서 z-index에 따라 **"쌓이는"** 것을 볼 수 있다. 바로 이것이 쌓임 맥락의 개념이며 쌓임 맥락을 형성하는 조건은 [꽤 많다.](https://developer.mozilla.org/ko/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context) 모든 걸 기억하면 좋겠지만 중요한 것들을 기억해두록 하자.
+
+* **position이 relative/absolute이면서 z-index가 auto가 아닌 요소**
+* **position이 fixed/sticky인 요소**
+* **opacity가 1보다 작은 요소**
+* **transform이 none이 아닌 요소**
+
+가장 많이 쓰는 속성들을 기준으로 조금만 나열해보면 위와 같은데 이 정도는 암기하도록 하자.
+
+쌓임 맥락은 다음 특징들을 갖는다.
+
+* 쌓임 맥락은 **다른 쌓임 맥락을 포함할 수 있다.**
+* 쌓임 맥락에서 쌓임을 고려하는 것은 **오직 자식 요소들에 대해서** 만이다.
+
+즉, 2개의 쌓임 맥락을 형성하는 요소가 있다고 했을 때, 각각은 독립적인 쌓인 맥락을 갖으며 그 안의 자식 요소들은 부모 안에서의 쌓임만 고려된다는 것이다. 
+
+<br/>
+
+#### 우선순위
+
+쌓임 맥락을 형성하는 요소가 아무것도 없다고 하면 다음 우선순위로 쌓이게 된다.
+
+<img src="/img/default stacking order.png"/>
+
+
+[그림 출처](https://tympanus.net/codrops/css_reference/z-index/)
+
+만약, 동일한 성격의 요소라면 마크업 순서로 쌓임이 결정된다. 즉, 아래와 같은 경우,
+
+```html
+<div>A</div>
+<div>B</div>
+<div>C</div>
+```
+
+```css
+div {
+  position: absolute;
+}
+```
+
+여기서 쌓임 맥락을 형성하는 것으로 착각할 수도 있는데 `position: absolute` 라고 해도 `z-index: auto` 이면 쌓임 맥락을 형성하지 않는다. 어쨌든 여기선 동일한 성격의 요소들이기 때문에 마크업 순서인 A,B,C 순으로 쌓임이 형성된다. ([Codepen](https://codepen.io/BaeHaram/pen/ExjmvRY) 에서 확인할 수 있다.)
+
+쌓임 맥락을 형성한다면, `z-index` 값을 설정할 수 있는 `position: static` 이 아닌 요소들의 경우는 동일한 마크업 레벨에서, `z-index` 값으로 우선순위를 결정한다. `z-index` 값을 설정할 수 없는 요소라면 마크업 순서로 결정한다. 여기선 `position: static` 이 아니고 `z-index: auto` 가 아닌 요소를 보자.
+
+```html
+<div>1</div>
+<div>2</div>
+<div>3
+  <div>4</div>
+  <div>5</div>
+  <div>6</div>
+</div>
+```
+
+마크업이 위와 같이 되어 있을 때, `z-index` 에 따라 다음과 같이 쌓인다.
+
+<img src="/img/z-index stacking order.png"/>
+
+[그림출처](https://developer.mozilla.org/ko/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context)
+
+* div1과 div2, div3는 같은 레벨에 있으므로 z-index에 따라 쌓이기 때문에 div2 > div3 > div1 순으로 쌓인다.
+* div4와 div5, div6은 div3안에 있으므로 **그 안에서** z-index에 따라 쌓인다.
+* 즉, div3 안의 요소들의 z-index가 div1,div2 보다 커도 영향을 주지 않는다.
+* 결론적으로, div5 > div6 > div4 순으로 쌓인다.
+
+<br/>
+
+#### 참고
+
+* [CSSReference, z-index](https://tympanus.net/codrops/css_reference/z-index/)
+* [MDN, Stacking Context](https://developer.mozilla.org/ko/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context)
+* [MDN, z-index](https://developer.mozilla.org/ko/docs/Web/CSS/z-index)
+
+
+***
+
+### block vs inline vs inline-block
+
+| 특징                         | block              | inline             | inline-block       |
+| ---------------------------- | ------------------ | ------------------ | ------------------ |
+| 상하 마진/패딩               | :white_check_mark: | :x:                | :white_check_mark: |
+| 좌우 마진/패딩               | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| 요소 사이 줄바꿈             | :white_check_mark: | :x:                | :x:                |
+| 기본너비가 부모너비          | :white_check_mark: | :x:                | :x:                |
+| 요소 사이 공백               | :x:                | :white_check_mark: | :white_check_mark: |
+| 너비와 높이 명시했을 때 적용 | :white_check_mark: | :x:                | :white_check_mark: |
+
+[Codepen](https://codepen.io/BaeHaram/pen/poJaRyK) 을 통해서 확인해보면 위의 특징들을 좀 더 명확하게 알 수 있으니 해보도록 하자.
+
+<br/>
+
+#### 참고
+
+* [Gist, css-display.md](https://gist.github.com/Asheq/1ef5ec77b8e89c2c9da89d2b7a1cf8cb)
+* [Stackoverflow, CSS display: inline vs inline-block](https://stackoverflow.com/questions/9189810/css-display-inline-vs-inline-block)
+
+
+***
+
+# Reset.css vs Normalize.css
+
+크롬, 사파리, IE 등 각 브라우저마다 HTML 요소의 기본 스타일을 가지고 있다. 따라서, CSS로 스타일링을 적용할 때 이러한 특징이 동일한 스타일 적용을 방해하기 때문에 이를 해결하기 위해서 나온 스타일 초기화 기법들이다.
+
+<br/>
+
+#### Reset.css
+
+**모든 브라우저 내장 스타일을 없애는 기법** 으로, 그 어떤 스타일도 없는 상태에서 스타일링을 시작한다. `h1` ~ `h6` , `p` , `em` 등 각 태그에 적용되는 스타일을 모두 없앤다. 가장 유명한 스타일은 Eric Mayer의 Reset CSS이며 이를 [깃헙](https://github.com/shannonmoeller/reset-css) 에서 유지하고 있다. 보통, 초기화를 한 후 각자의 방식에 맞게 변형해서 사용한다.
+
+<br/>
+
+#### Normalize.css
+
+**모든 브라우저의 스타일을 동일하게 하는 기법** 으로, 스타일을 없애는 Reset.css와는 다르게 기존 스타일을 유지하되 브라우저들의 다른 스타일을 고치는 방식이다. 가장 유명한 스타일은 necolas의 normalize.css이며 이를 [깃헙](https://github.com/necolas/normalize.css/) 에서 유지하고 있다. 실제 코드의 주석을 보면 각 요소를 스타일링 하는 이유에 대해 설명하고 있다.
+
+<br/>
+
+#### 차이점과 선택
+
+* Reset.css의 경우, 모든 것을 초기화하기 때문에 스타일을 처음부터 적용해 나가는 것이 힘들 수 있고 브라우저의 버그를 고치는 것이 아니기 때문에 각 브라우저마다 다른 버그를 발생시킬 수 있다. 하지만, 아예 초기화를 하는 것이기 때문에 업데이트가 필요없다.
+* Normalize.css의 경우, 브라우저가 업데이트 되어서 새로운 내장 스타일이 적용될 때마다 각 브라우저의 다른 점을 파악하여 스타일을 업데이트해야 하기 때문에 끊임없는 버전 업데이트가 있어야 최신 스타일을 유지할 수 있다. 하지만, 브라우저의 버그를 고치기 때문에 버그가 발생할 걱정을 덜고 기본 스타일을 어느정도 유지하기 때문에 스타일링에 힘을 덜 들일 수 있다.
+
+둘 다 장단점이 있기 때문에 어떤 것이 더 낫다라고는 할 수 없고, 상황에 맞게 적용해서 사용하면 된다고 생각한다.
+
+<br/>
+
+#### 참고
+
+* [Stackoverflow, CSS reset - What exactly does it do?](https://stackoverflow.com/questions/11578819/css-reset-what-exactly-does-it-do)
+* [Stackoverflow, What is the difference between Normalize.css and Reset CSS?](https://stackoverflow.com/questions/6887336/what-is-the-difference-between-normalize-css-and-reset-css)
+* [reset.css 와 Normalize.css](https://sapjil.net/resetcss-normalizecss/)
+* [About normalize.css](http://nicolasgallagher.com/about-normalize-css/)
+
+
+***
+
+### 그리드 시스템
+
+그리드 레이아웃을 구현하기 위해 설계한 시스템으로 너비 960px 혹은 1200px 기준으로 정해놓은 시스템들이 있다. 열(Column)의 개수에 따라 12단/16단/24단 그리드라고 부르기도 한다. 그리드 레이아웃을 구현하는 방법은 여러가지가 있으며 여기선 12단 그리드로 진행한다.
+
+> float, flexbox, grid의 기본개념과 문법들에 대해 알고있어야 한다.
+
+<br/>
+
+#### Float grid system
+
+flexbox나 grid가 나오기 이전에 사용하던 방식으로 float 속성을 사용하여 구현한다. float된 높이를 잡기 위해 clearfix 핵을 사용해야 하며 각 너비를 열/행의 간격에 맞게 계산해주어야 한다.
+
+**[Codepen](https://codepen.io/BaeHaram/pen/XWbYpwx) 에서 꼭 직접 해보자!**
+
+<img src="/img/float-grid.png"/>
+
+```html
+<h1>Float grid system</h1>
+<div class="container">
+  <div class="row">
+    <div class="col col-3-12"></div>
+    <div class="col col-3-12"></div>
+    <div class="col col-3-12"></div>
+    <div class="col col-3-12"></div>
+  </div>
+  <div class="row">
+    <div class="col col-6-12"></div>
+    <div class="col col-6-12"></div>
+  </div>
+  <div class="row">
+    <div class="col col-4-12"></div>
+    <div class="col col-4-12"></div>
+    <div class="col col-4-12"></div>
+  </div>
+</div>
+```
+
+```css
+:root {
+  --gutter: 10px;
+}
+.container { 
+  width: 500px;
+  border: 3px solid red;
+  padding: 1rem;
+}
+.row::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.row + .row {
+  margin-top: var(--gutter);
+}
+
+.col {
+  height: 100px;
+  background-color: orange;
+  float: left;
+  margin-right: var(--gutter);
+}
+
+.col:last-child { margin-right: 0; }
+
+.col-1-12 { width: calc(100%/(12/1) - var(--gutter)*11/12); }
+.col-2-12 { width: calc(100%/(12/2) - var(--gutter)*10/12); }
+.col-3-12 { width: calc(100%/(12/3) - var(--gutter)*9/12); }
+.col-4-12 { width: calc(100%/(12/4) - var(--gutter)*8/12); }
+.col-5-12 { width: calc(100%/(12/5) - var(--gutter)*7/12); }
+.col-6-12 { width: calc(100%/(12/6) - var(--gutter)*6/12); }
+.col-7-12 { width: calc(100%/(12/7) - var(--gutter)*5/12); }
+.col-8-12 { width: calc(100%/(12/8) - var(--gutter)*4/12); }
+.col-9-12 { width: calc(100%/(12/9) - var(--gutter)*3/12); }
+.col-10-12 { width: calc(100%/(12/10) - var(--gutter)*2/12); }
+.col-11-12 { width: calc(100%/(12/11) - var(--gutter)*1/12); }
+.col-12-12 { width: calc(100%/(12/12) - var(--gutter)*0/12); }
+
+
+.col:nth-child(even) {
+  background-color: blue;
+}
+```
+
+`row::after` 로 clearfix 핵을 적용하였고 행의 `margin` 으로 수직 간격을, 열의 `margin` 으로 수평 간격을 지정하였다. 또한 12단 그리드이기 때문에 `.col-x-12` 가 뜻하는 것은 12단 중에 x개를 차지하는 너비를 말한다. 간격에 유동적으로 적용하기 위해 간격변수인 `--gutter` 기준으로 계산하였다.
+
+<br/>
+
+#### Flexbox grid system
+
+**[Codepen](https://codepen.io/BaeHaram/pen/oNXyZvv) 에서 꼭 직접 해보자!**
+
+<img src="/img/flexbox-grid.png"/>
+
+대부분 float를 사용한 방식과 동일하되, clearfix 핵을 없애고 flex를 적용한 것이다.
+
+```css
+/*.row::after {
+  content: '';
+  display: block;
+  clear: both;
+}*/
+.row {
+  display: flex;
+}
+```
+
+<br/>
+
+#### Grid layout grid system
+
+grid를 사용한 경우로, float/flexbox와는 완전히 다르다. 너비를 계산하지도 않고 `row` 나 `column` 을 따로 지정하지 않는다. 단순하게 grid 관련된 속성을 사용해서 열/행의 너비 및 높이와 각 항목의 비율을 지정한다.
+
+**[Codepen](https://codepen.io/BaeHaram/pen/JjdZWoQ) 에서 꼭 직접 해보자!**
+
+<img src="/img/grid-grid.png"/>
+
+```html
+<h1>Grid layout grid system</h1>
+<div class="container">
+  <div class="grid">
+    <div class="item item-1">1</div>
+    <div class="item item-2">2</div>
+    <div class="item item-3">3</div>
+    <div class="item item-4">4</div>
+    <div class="item item-5">5</div>
+    <div class="item item-6">6</div>
+    <div class="item item-7">7</div>
+    <div class="item item-8">8</div>
+  </div>
+</div>
+```
+
+```css
+.container { 
+  width: 500px;
+  border: 3px solid red;
+  padding: 1rem;
+}
+
+.grid {
+  display: grid;
+  height: 500px;
+  grid-template-rows: repeat(4,1fr);
+  grid-template-columns: repeat(3,1fr);
+  grid-row-gap: 10px;
+  grid-column-gap: 10px;
+}
+
+.item {
+  background-color: crimson;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.item:nth-child(even) {
+  background-color: yellow;
+}
+
+.item-3 {
+  grid-row: 1/3;
+  grid-column-start: 3;
+}
+
+.item-6 {
+  grid-column: 1/4;
+  grid-row: 3/4;
+}
+```
+
+<br/>
+
+#### 참고
+
+* [Sass로 12단 그리드 시스템 만드는 법](https://medium.com/fluosoup/sass로-12단-그리드-시스템-만드는-법-d2c7cf54c36)
+* [CSS Grid 완벽 가이드](https://heropy.blog/2019/08/17/css-grid/)
+
+

@@ -1,207 +1,162 @@
 ---
-title: HTML trivia questions in front end interviews
+title: HTML
 sidebar_label: HTML
-sidebar_position: 3
+sidebar_position: 4
+toc_min_heading_level: 3
+toc_max_heading_level: 3
 ---
-
-Answers to [Front-end Job Interview Questions - HTML Questions](https://github.com/h5bp/Front-end-Developer-Interview-Questions/blob/master/src/questions/html-questions.md). Pull requests for suggestions and corrections are welcome!
 
 import TOCInline from '@theme/TOCInline';
 
 <TOCInline toc={toc} />
 
-### What does a DOCTYPE do?
+***
 
-**DOCTYPE** is an abbreviation for **Document Type**. A DOCTYPE is always associated to a **DTD** - for **Document Type Definition**.
+### DOCTYPE
 
-A DTD defines how documents of a certain type should be structured (i.e. a `button` can contain a `span` but not a `div`), whereas a DOCTYPE declares what DTD a document _supposedly_ respects (i.e. this document respects the HTML DTD).
+Document Type의 약자로, **HTML이 어떤 버전으로 작성되었는지 미리 선언하여 웹브라우저가 내용을 올바로 표시할 수 있도록 해주는 것** 이다. `<!DOCTYPE>` 으로 선언하는데 이걸 해주지 않으면 **호환 모드(quirks mode)** 로 동작한다. 호환 모드의 경우 각 브라우저마다 문서를 나타내는 방식이 다르기 때문에 크로스 브라우징 이슈가 훨씬 심해지게 된다.
 
-For webpages, the DOCTYPE declaration is required. It is used to tell user agents what version of the HTML specifications your document respects. Once a user agent has recognized a correct DOCTYPE, it will trigger the **no-quirks mode** matching this DOCTYPE for reading the document. If a user agent doesn't recognize a correct DOCTYPE, it will trigger the **quirks mode**.
+#### DTD(Document Type Definition)
 
-The DOCTYPE declaration for the HTML5 standards is `<!DOCTYPE html>`.
+DTD(Document Type Definition)란 문서 형식을 정의해놓은 것으로 DOCTYPE을 명시할 때 사용한다. 즉, HTML 문서가 어떤 문서 형식을 따르는지 DOCTYPE에서 DTD를 지정하는 것이다.
 
-###### References
+예시로 아래와 같은 것들이 있고 [W3C Recommended list of Doctype declarations](https://www.w3.org/QA/2002/04/valid-dtd-list.html) 에서 더욱 자세하게 확인 가능하다.
 
-- https://html.spec.whatwg.org/multipage/syntax.html#the-doctype
-- https://html.spec.whatwg.org/multipage/xhtml.html
-- https://quirks.spec.whatwg.org/
+* XHTML 1.1
+* XHTML 1.0
+  * Strict DTD
+  * Transitional DTD
+  * Frameset DTD
+* HTML 4.01
+  * Strict DTD
+  * Transitional DTD
+  * Frameset DTD
+* HTML 5
 
-[[↑] Back to top](#table-of-contents)
+현 시점에선, HTML 5의 DTD로 DOCTYPE을 명시하는 것이 제일 바람직하다.
 
-### How do you serve a page with content in multiple languages?
+```html
+<!DOCTYPE html>
+```
 
-I will assume that it is asking about the most common case, which is how to serve a page with content available in multiple languages, but the content within the page should be displayed only in one consistent language.
+<br/>
 
-When an HTTP request is made to a server, the requesting user agent usually sends information about language preferences, such as in the `Accept-Language` header. The server can then use this information to return a version of the document in the appropriate language if such an alternative is available. The returned HTML document should also declare the `lang` attribute in the `<html>` tag, such as `<html lang="en">...</html>`.
+#### 참고
 
-Of course this is useless for letting a search engine know that the same content is available in different languages, and so you must also make use of the `hreflang` attribute in the `<head>`. Eg. `<link rel="alternate" hreflang="de" href="http://de.example.com/page.html" />`
+* [What is DOCTYPE?](https://stackoverflow.com/questions/414891/what-is-doctype)
+* [비표준 모드 quirks mode, 표준 모드 standards mode 차이와 DOCTYPE](https://aboooks.tistory.com/169)
+* [DOCTYPE(문서형 정의) 선언](https://webdir.tistory.com/40)
+* [What is difference between XHTML and HTML?](https://stackoverflow.com/questions/4153403/what-is-difference-between-xhtml-and-html)
 
-In the back end, the HTML markup will contain `i18n` placeholders and content for the specific language stored in YML or JSON formats. The server then dynamically generates the HTML page with content in that particular language, usually with the help of a back end framework.
 
-###### References
+***
 
-- https://www.w3.org/International/getting-started/language
-- https://support.google.com/webmasters/answer/189077
 
-[[↑] Back to top](#table-of-contents)
+### data- 속성
 
-### What kind of things must you be wary of when designing or developing for multilingual sites?
+**DOM에 데이터를 저장할 수 있는 사용자 정의 데이터 속성** 으로 `data-` 다음 오는 값이 데이터가 된다. 이 속성은 사용하고자 하는 용도에 적합한 속성이나 요소가 없을 때 사용하며 해당 웹페이지가 **독자적으로 사용하는 값** 이다. 즉, 웹페이지와 독립적인 소프트웨어가 이 속성을 사용해서는 안된다.
 
-- Use `lang` attribute in your HTML.
-- Directing users to their native language - Allow a user to change his country/language easily without hassle.
-- Text in raster-based images (e.g. png, gif, jpg, etc.), is not a scalable approach - Placing text in an image is still a popular way to get good-looking, non-system fonts to display on any computer. However, to translate image text, each string of text will need to have a separate image created for each language. Anything more than a handful of replacements like this can quickly get out of control.
-- Restrictive words/sentence length - Some content can be longer when written in another language. Be wary of layout or overflow issues in the design. It's best to avoid designing where the amount of text would make or break a design. Character counts come into play with things like headlines, labels, and buttons. They are less of an issue with free-flowing text such as body text or comments.
-- Be mindful of how colors are perceived - Colors are perceived differently across languages and cultures. The design should use color appropriately.
-- Formatting dates and currencies - Calendar dates are sometimes presented in different ways. Eg. "May 31, 2012" in the U.S. vs. "31 May 2012" in parts of Europe.
-- Do not concatenate translated strings - Do not do anything like `"The date today is " + date`. It will break in languages with different word order. Use a template string with parameters substitution for each language instead. For example, look at the following two sentences in English and Chinese respectively: `I will travel on {% date %}` and `{% date %} 我会出发`. Note that the position of the variable is different due to grammar rules of the language.
-- Language reading direction - In English, we read from left-to-right, top-to-bottom, in traditional Japanese, text is read up-to-down, right-to-left.
-- Useful-to-have - include the locale in the path (e.g en_US, zh_CN, etc).
+예를 들어, 음악 사이트에서 앨범 트랙의 음악을 리스트 형식으로 나타내는데 그걸 시간 순으로 정렬하기 위해서 `data-` 속성으로 음악 시간을 삽입한다고 하자.
 
-###### References
+```html
+<ol>
+  <li data-length="2m11s">빨간맛</li>
+  ...
+</ol>
+```
 
-- https://www.quora.com/What-kind-of-things-one-should-be-wary-of-when-designing-or-developing-for-multilingual-sites
+만약 이 음악 사이트와 전혀 상관이 없는 외부에서 음악 시간을 알아내기 위해 사용한다면 목적에 부합하지 않는 것이다. 따라서, `data-` 속성은 해당 사이트만의 자체 스크립트를 위한 속성이라고 할 수 있다.
 
-[[↑] Back to top](#table-of-contents)
+<br/>
 
-### What are `data-` attributes good for?
+#### 참고
 
-Before JavaScript frameworks became popular, front end developers used `data-` attributes to store extra data within the DOM itself, without other hacks such as non-standard attributes, extra properties on the DOM. It is intended to store custom data private to the page or application, for which there are no more appropriate attributes or elements.
+* [W3, Custom Data Attribute](https://www.w3.org/TR/2011/WD-html5-20110525/elements.html#custom-data-attribute)
+* [프론트엔드 인터뷰 핸드북, `data-` 속성은 무엇에 좋은가요?](https://github.com/yangshun/front-end-interview-handbook/blob/master/contents/kr/html-questions.md#data-속성은-무엇에-좋은가요)
 
-These days, using `data-` attributes is generally not encouraged. One reason is that users can modify the data attribute easily by using inspect element in the browser. The data model is better stored within JavaScript itself and stay updated with the DOM via data binding possibly through a library or a framework.
 
-However, one perfectly valid use of data attributes, is to add a hook for _end to end_ testing frameworks such as Selenium and Capybara without having to create a meaningless classes or ID attributes. The element needs a way to be found by a particular Selenium spec and something like `data-selector='the-thing'` is a valid way to do so without convoluting the semantic markup otherwise.
+***
 
-###### References
+### local storage vs session storage vs cookie
 
-- http://html5doctor.com/html5-custom-data-attributes/
-- https://www.w3.org/TR/html5/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes
+모두 클라이언트 상에서 key/value 쌍을 저장할 수 있는 메커니즘으로 **value는 반드시 문자열** 이어야 한다. 또한 모두 [동일 출처 정책(SOP)](https://github.com/baeharam/Must-Know-About-Frontend/blob/master/Notes/security/sop.md) 을 따르기 때문에 다른 도메인에서 접근할 수 없다.
 
-[[↑] Back to top](#table-of-contents)
+|               | cookie           | local storage         | session storage         |
+| ------------- | ---------------- | --------------------- | ----------------------- |
+| 생성자        | 클라이언트/서버  | 클라이언트            | 클라이언트              |
+| 지속시간      | 설정 여부에 따름 | 명시적으로 지울때까지 | 탭 / 윈도우 닫을 때까지 |
+| 용량          | 5KB              | 5MB / 10MB            | 5MB                     |
+| 서버와의 통신 | O                | X                     | X                       |
+| 취약점        | XSS / CSRF 공격  | XSS 공격              | XSS 공격                |
 
-### Consider HTML5 as an open web platform. What are the building blocks of HTML5?
+<br/>
 
-- Semantics - Allowing you to describe more precisely what your content is.
-- Connectivity - Allowing you to communicate with the server in new and innovative ways.
-- Offline and storage - Allowing webpages to store data on the client-side locally and operate offline more efficiently.
-- Multimedia - Making video and audio first-class citizens in the Open Web.
-- 2D/3D graphics and effects - Allowing a much more diverse range of presentation options.
-- Performance and integration - Providing greater speed optimization and better usage of computer hardware.
-- Device access - Allowing for the usage of various input and output devices.
-- Styling - Letting authors write more sophisticated themes.
+#### 참고
 
-###### References
+* [What is the difference between localStorage, sessionStorage, session and cookies?](https://stackoverflow.com/questions/19867599/what-is-the-difference-between-localstorage-sessionstorage-session-and-cookies)
+* [프론트엔드 인터뷰 핸드북, `cookie`, `sessionStorage`, `localStorage` 사이의 차이점을 설명하세요](https://github.com/yangshun/front-end-interview-handbook/blob/master/Translations/Korean/questions/html-questions.md#cookie-sessionstorage-localstorage-사이의-차이점을-설명하세요)
+* [Local Storage vs Cookies](https://stackoverflow.com/questions/3220660/local-storage-vs-cookies)
 
-- https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5
 
-[[↑] Back to top](#table-of-contents)
+***
 
-### Describe the difference between a `cookie`, `sessionStorage` and `localStorage`.
+### script, script async, script defer
 
-All the above-mentioned technologies are key-value storage mechanisms on the client side. They are only able to store values as strings.
+* `<script>` : HTML 파싱이 중단되고 즉시 스크립트가 로드되며 로드된 스크립트가 실행되고 파싱이 재개된다.
+* `<script async>` : HTML 파싱과 병렬적으로 로드가 되는데, 스크립트를 실행할 때는 파싱이 중단된다. 구글 애널리틱스와 같이 다른 스크립트가 의존하지 않는 독자적인 스크립트를 로드할 때 적합하다.
+* `<script defer>` : HTML 파싱과 병렬적으로 로드가 되는데, 파싱이 끝나고 스크립트를 로드한다. 보통 `<body>` 태그 직전에 `<script>` 를 삽입하는 것과 동작은 같지만 브라우저 호환성에서 다를 수 있으므로 그냥 `<body>` 태그 직전에 삽입하는 것이 좋다.
 
-|  | `cookie` | `localStorage` | `sessionStorage` |
-| --- | --- | --- | --- |
-| Initiator | Client or server. Server can use `Set-Cookie` header | Client | Client |
-| Expiry | Manually set | Forever | On tab close |
-| Persistent across browser sessions | Depends on whether expiration is set | Yes | No |
-| Sent to server with every HTTP request | Cookies are automatically being sent via `Cookie` header | No | No |
-| Capacity (per domain) | 4kb | 5MB | 5MB |
-| Accessibility | Any window | Any window | Same tab |
+**주의할 점은 async와 defer의 경우 `src` 속성이 없으면 적용되지 않는다.**
 
-_Note: If the user decides to clear browsing data via whatever mechanism provided by the browser, this will clear out any `cookie`, `localStorage`, or `sessionStorage` stored. It's important to keep this in mind when designing for local persistance, especially when comparing to alternatives such as server side storing in a database or similar (which of course will persist despite user actions)._
+<br/>
 
-###### References
+#### 참고
 
-- https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
-- http://tutorial.techaltum.com/local-and-session-storage.html
+* [Script Tag - async & defer](https://stackoverflow.com/questions/10808109/script-tag-async-defer)
 
-[[↑] Back to top](#table-of-contents)
+* [프론트엔드 인터뷰 핸드북, `<script>`, `<script async>`, `<script defer>` 사이의 차이점을 설명하세요](https://github.com/yangshun/front-end-interview-handbook/blob/master/Translations/Korean/questions/html-questions.md#script-script-async-script-defer-사이의-차이점을-설명하세요)
 
-### Describe the difference between `<script>`, `<script async>` and `<script defer>`.
 
-- `<script>` - HTML parsing is blocked, the script is fetched and executed immediately, HTML parsing resumes after the script is executed.
-- `<script async>` - The script will be fetched in parallel to HTML parsing and executed as soon as it is available (potentially before HTML parsing completes). Use `async` when the script is independent of any other scripts on the page, for example, analytics.
-- `<script defer>` - The script will be fetched in parallel to HTML parsing and executed when the page has finished parsing. If there are multiple of them, each deferred script is executed in the order they were encountered in the document. If a script relies on a fully-parsed DOM, the `defer` attribute will be useful in ensuring that the HTML is fully parsed before executing. A deferred script must not contain `document.write`.
+***
 
-Note: The `async` and `defer` attributes are ignored for scripts that have no `src` attribute.
 
-###### References
+### 시맨틱 마크업
 
-- http://www.growingwiththeweb.com/2014/02/async-vs-defer-attributes.html
-- https://stackoverflow.com/questions/10808109/script-tag-async-defer
-- https://bitsofco.de/async-vs-defer/
+시맨틱(Semantic)이란 "의미론적인" 의 뜻을 가지며 마크업(Markup)이란 HTML 태그로 문서를 작성하는 것을 말한다. 따라서, 시맨틱 마크업이란 **의미를 잘 전달하도록 문서를 작성하는 것을 말한다.**
 
-[[↑] Back to top](#table-of-contents)
+#### 작성방법
 
-### Why is it generally a good idea to position CSS `<link>`s between `<head></head>` and JS `<script>`s just before `</body>`? Do you know any exceptions?
+시맨틱 마크업을 하기 위해선 각 태그를 그 용도에 맞게 사용하여야 한다. 즉, 다음과 같은 것들을 말한다.
 
-**Placing `<link>`s in the `<head>`**
+* 헤더/푸터에 `<header>` 와 `<footer>` 사용
+* 메인 컨텐츠에 `<main>` 과 `<section>` 사용
+* 독립적인 컨텐츠에 `<article>` 사용
+* 최상위 제목으로 `<h1>` 사용
+* 순서가 없는 목록으로 `<ul>` 과 `<li>` 사용
+* 내비게이션에 `<nav>` 사용
 
-Putting `<link>`s in the `<head>` is part of proper specification in building an optimized website. When a page first loads, HTML and CSS are being parsed simultaneously; HTML creates the DOM (Document Object Model) and CSS creates the CSSOM (CSS Object Model). Both are needed to create the visuals in a website, allowing for a quick "first meaningful paint" timing. This progressive rendering is a category optimization sites are measured in their performance scores. Putting stylesheets near the bottom of the document is what prohibits progressive rendering in many browsers. Some browsers block rendering to avoid having to repaint elements of the page if their styles change. The user is then stuck viewing a blank white page. Other times there can be flashes of unstyled content (FOUC), which show a webpage with no styling applied.
+이런 식으로 태그가 가지고 있는 의미에 맞게 사용하는 것인데, 이런 점 이외에도 CSS 스타일을 명시하는 태그를 사용하지 않는 것 또한 시맨틱 마크업의 한 종류이다. **즉, 태그가 가지는 의미 자체가 스타일이라면 이는 마크업 자체가 스타일을 갖는 것이기 때문에 시맨틱 마크업에 적합하지 않다.**
 
-**Placing `<script>`s just before `</body>`**
+예를 들어, 동일한 효과를 부여하는 `<strong>` 과 `<b>` 태그가 있다. 둘은 동일하게 글자색을 진하게 하지만 `<b>` 태그의 경우는 그 자체가 "bold" 의 약어이기 때문에 태그 자체가 스타일을 가진다고 할 수 있다. 하지만 `<strong>` 의 경우는 "그 안의 내용이 다른 내용보다 더 강조되어야 한다" 라는 의미를 가지기 때문에 시맨틱 마크업에 더 적합하다.
 
-`<script>` tags block HTML parsing while they are being downloaded and executed which can slow down your page. Placing the scripts at the bottom will allow the HTML to be parsed and displayed to the user first.
+<br/>
 
-An exception for positioning of `<script>`s at the bottom is when your script contains `document.write()`, but these days it's not a good practice to use `document.write()`. Also, placing `<script>`s at the bottom means that the browser cannot start downloading the scripts until the entire document is parsed. This ensures your code that needs to manipulate DOM elements will not throw an error and halt the entire script. If you need to put `<script>`s in the `<head>`, use the `defer` attribute, which will achieve the same effect of running the script only after the HTML is parsed but the browser can download the script earlier.
+#### 특징
 
-Keep in mind that putting scripts just before the closing `</body>` tag will create the illusion that the page loads faster on an empty cache (since the scripts won't block downloading the rest of the document). However, if you have some code you want to run during page load, it will only start executing after the entire page has loaded. If you put those scripts in the `<head>` tag, they would start executing before - so on a primed cache the page would actually appear to load faster.
+* 검색엔진이 시맨틱 태그를 중요한 키워드로 간주하기 때문에 **검색엔진 최적화(SEO)에 유리하다.**
+* **웹 접근성** 측면에서, 시각장애가 있는 사용자로 하여금 그 의미를 훨씬 잘 파악할 수 있다.
+* 단순한 `div` , `span` 으로 둘러싸인 요소들보다 코드를 볼 때 **가독성이 더 좋다.**
 
-###### References
+실무에서 시맨틱 마크업이 완벽하게 쓰이는 것은 이상적이긴 하지만, 이러한 특징들을 고려하고 웹사이트를 구성하는 것이 많은 측면에서 바람직하다.
 
-- https://developer.yahoo.com/performance/rules.html#css_top
-- https://www.techrepublic.com/blog/web-designer/how-to-prevent-flash-of-unstyled-content-on-your-websites/
-- https://developers.google.com/web/fundamentals/performance/critical-rendering-path/
+<br/>
 
-[[↑] Back to top](#table-of-contents)
+#### 참고
 
-### What is progressive rendering?
+* [Stackoverflow, What are the benefits of using semantic HTML?](https://stackoverflow.com/questions/1729447/what-are-the-benefits-of-using-semantic-html)
+* [Stackoverflow, What's the difference between  and ,  and ?](https://stackoverflow.com/questions/271743/whats-the-difference-between-b-and-strong-i-and-em)
+* [MDN, Semantics](https://developer.mozilla.org/ko/docs/Glossary/Semantics)
 
-Progressive rendering is the name given to techniques used to improve the performance of a webpage (in particular, improve perceived load time) to render content for display as quickly as possible.
 
-It used to be much more prevalent in the days before broadband internet but it is still used in modern development as mobile data connections are becoming increasingly popular (and unreliable)!
+***
 
-Examples of such techniques:
-
-- Lazy loading of images - Images on the page are not loaded all at once. JavaScript will be used to load an image when the user scrolls into the part of the page that displays the image.
-- Prioritizing visible content (or above-the-fold rendering) - Include only the minimum CSS/content/scripts necessary for the amount of page that would be rendered in the users browser first to display as quickly as possible, you can then use deferred scripts or listen for the `DOMContentLoaded`/`load` event to load in other resources and content.
-- Async HTML fragments - Flushing parts of the HTML to the browser as the page is constructed on the back end. More details on the technique can be found [here](http://www.ebaytechblog.com/2014/12/08/async-fragments-rediscovering-progressive-html-rendering-with-marko/).
-
-###### References
-
-- https://stackoverflow.com/questions/33651166/what-is-progressive-rendering
-- http://www.ebaytechblog.com/2014/12/08/async-fragments-rediscovering-progressive-html-rendering-with-marko/
-
-[[↑] Back to top](#table-of-contents)
-
-### Why you would use a `srcset` attribute in an image tag? Explain the process the browser uses when evaluating the content of this attribute.
-
-You would use the `srcset` attribute when you want to serve different images to users depending on their device display width - serve higher quality images to devices with retina display enhances the user experience while serving lower resolution images to low-end devices increase performance and decrease data wastage (because serving a larger image will not have any visible difference). For example: `<img srcset="small.jpg 500w, medium.jpg 1000w, large.jpg 2000w" src="..." alt="">` tells the browser to display the small, medium or large `.jpg` graphic depending on the client's resolution. The first value is the image name and the second is the width of the image in pixels. For a device width of 320px, the following calculations are made:
-
-- 500 / 320 = 1.5625
-- 1000 / 320 = 3.125
-- 2000 / 320 = 6.25
-
-If the client's resolution is 1x, 1.5625 is the closest, and `500w` corresponding to `small.jpg` will be selected by the browser.
-
-If the resolution is retina (2x), the browser will use the closest resolution above the minimum. Meaning it will not choose the 500w (1.5625) because it is greater than 1 and the image might look bad. The browser would then choose the image with a resulting ratio closer to 2 which is 1000w (3.125).
-
-`srcset`s solve the problem whereby you want to serve smaller image files to narrow screen devices, as they don't need huge images like desktop displays do — and also optionally that you want to serve different resolution images to high density/low-density screens.
-
-###### References
-
-- https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images
-- https://css-tricks.com/responsive-images-youre-just-changing-resolutions-use-srcset/
-
-[[↑] Back to top](#table-of-contents)
-
-### Have you used different HTML templating languages before?
-
-Yes, Pug (formerly Jade), ERB, Slim, Handlebars, Jinja, Liquid, and EJS just to name a few. In my opinion, they are more or less the same and provide similar functionality of escaping content and helpful filters for manipulating the data to be displayed. Most templating engines will also allow you to inject your own filters in the event you need custom processing before display.
-
-[[↑] Back to top](#table-of-contents)
-
-### Other Answers
-
-- https://neal.codes/blog/front-end-interview-questions-html/
-- http://peterdoes.it/2015/12/03/a-personal-exercise-front-end-job-interview-questions-and-my-answers-all/
