@@ -1,3 +1,5 @@
-# 기술면접대비 정보모음 사이트
+# Tech-collection document
+
+https://tech-collection.vercel.app/
 
 Made by docusaurus
